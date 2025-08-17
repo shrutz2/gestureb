@@ -66,7 +66,7 @@ const SearchPage = ({ onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  const popularWords = ['hello', 'thank you', 'love', 'help', 'please', 'sorry', 'good', 'bad', 'yes', 'no'];
+  const popularWords = ['hello', 'love', 'help', 'please', 'sorry', 'good', 'bad', 'yes', 'no'];
 
   const handleSearch = async (query) => {
     if (!query.trim()) return;
@@ -235,7 +235,7 @@ const PracticePage = ({ word, onBack }) => {
     setCountdown(RECORDING_CONFIG.COUNTDOWN_TIME);
     setSessionStats(prev => ({ ...prev, attempts: prev.attempts + 1 }));
 
-    console.log(`🎬 Starting ${RECORDING_CONFIG.SEQUENCE_MODE ? 'sequence' : 'static'} recording for: ${word}`);
+    console.log(` Starting ${RECORDING_CONFIG.SEQUENCE_MODE ? 'sequence' : 'static'} recording for: ${word}`);
 
     // Countdown phase
     const countInterval = setInterval(() => {
@@ -254,11 +254,11 @@ const PracticePage = ({ word, onBack }) => {
       let frameCount = 0;
       const totalFrames = Math.floor(RECORDING_CONFIG.RECORDING_TIME * 1000 / RECORDING_CONFIG.FRAME_INTERVAL);
 
-      console.log(`📹 Recording ${totalFrames} frames over ${RECORDING_CONFIG.RECORDING_TIME} seconds`);
+      console.log(` Recording ${totalFrames} frames over ${RECORDING_CONFIG.RECORDING_TIME} seconds`);
 
       // For sequence mode with continuous recording, we use a sliding window approach
       if (RECORDING_CONFIG.SEQUENCE_MODE && RECORDING_CONFIG.CONTINUOUS_RECORDING) {
-        console.log(`🎥 Using continuous sequence recording mode`);
+        console.log(` Using continuous sequence recording mode`);
         
         recordingIntervalRef.current = setInterval(() => {
           const frame = captureFrame();
@@ -276,7 +276,7 @@ const PracticePage = ({ word, onBack }) => {
                 (frameCount % Math.floor(RECORDING_CONFIG.SEQUENCE_LENGTH / 2) === 0)) {
               // Get the most recent frames for the sequence
               const sequenceFrames = frames.slice(-RECORDING_CONFIG.SEQUENCE_LENGTH);
-              console.log(`🔄 Analyzing sequence of ${sequenceFrames.length} frames (continuous mode)`);
+              console.log(` Analyzing sequence of ${sequenceFrames.length} frames (continuous mode)`);
               
               // Analyze without stopping recording
               analyzeGesture(sequenceFrames, false);
@@ -288,7 +288,7 @@ const PracticePage = ({ word, onBack }) => {
               setIsRecording(false);
               setRecordingProgress(100);
               
-              console.log(`✅ Completed recording with ${frames.length} total frames`);
+              console.log(` Completed recording with ${frames.length} total frames`);
               
               // Final analysis with the most recent sequence
               const finalSequence = frames.slice(-RECORDING_CONFIG.SEQUENCE_LENGTH);
@@ -313,7 +313,7 @@ const PracticePage = ({ word, onBack }) => {
               setIsRecording(false);
               setRecordingProgress(100);
               
-              console.log(`✅ Captured ${frames.length} frames for analysis`);
+              console.log(` Captured ${frames.length} frames for analysis`);
               analyzeGesture(frames, true);
             }
           }
@@ -323,7 +323,7 @@ const PracticePage = ({ word, onBack }) => {
   };
 
   const analyzeGesture = async (frames, isFinalAnalysis = true) => {
-    console.log(`🎯 Analyzing ${frames.length} frames for: ${word} (${isFinalAnalysis ? 'final' : 'continuous'} analysis)`);
+    console.log(` Analyzing ${frames.length} frames for: ${word} (${isFinalAnalysis ? 'final' : 'continuous'} analysis)`);
     
     // Only set analyzing state for final analysis to avoid UI flicker during continuous mode
     if (isFinalAnalysis) {
@@ -359,7 +359,7 @@ const PracticePage = ({ word, onBack }) => {
         return;
       }
       
-      console.log(`📊 Sending ${validFrames.length} high-quality frames to backend`);
+      console.log(`Sending ${validFrames.length} high-quality frames to backend`);
       
       const response = await fetch(`${API}/predict`, {
         method: 'POST',
@@ -377,7 +377,7 @@ const PracticePage = ({ word, onBack }) => {
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ API Error:', response.status, errorText);
+        console.error(' API Error:', response.status, errorText);
         
         if (isFinalAnalysis) {
           setFeedback({
@@ -392,7 +392,7 @@ const PracticePage = ({ word, onBack }) => {
       }
       
       const result = await response.json();
-      console.log(`✅ ${RECORDING_CONFIG.SEQUENCE_MODE ? 'Sequence' : 'Static'} prediction result:`, result);
+      console.log(` ${RECORDING_CONFIG.SEQUENCE_MODE ? 'Sequence' : 'Static'} prediction result:`, result);
       
       // Only update UI for final analysis or if we got a correct result during continuous mode
       if (isFinalAnalysis || (result.is_correct && result.confidence > 0.6)) {
@@ -479,7 +479,7 @@ const PracticePage = ({ word, onBack }) => {
           </video>
           {videoError && (
             <div style={{padding: '20px', textAlign: 'center', color: '#666'}}>
-              <p>📹 Video not available for "{word}"</p>
+              <p> Video not available for "{word}"</p>
               <p>Practice based on your knowledge of the sign!</p>
             </div>
           )}
@@ -540,7 +540,7 @@ const PracticePage = ({ word, onBack }) => {
             {feedback && (
               <div className={`feedback-panel ${feedback.is_correct ? 'success' : 'retry'} enhanced`}>
                 <div className="feedback-icon">
-                  {feedback.is_correct ? '🎉' : '💪'}
+                  {feedback.is_correct ? '🎉' : ''}
                 </div>
                 <div className="feedback-message">{feedback.message}</div>
                 
@@ -553,7 +553,7 @@ const PracticePage = ({ word, onBack }) => {
                       className="detection-image"
                     />
                     <p className="detection-note">
-                      {feedback.hands_detected_count > 0 ? '✅ Hand detected' : '⚠️ No hand detected'}
+                      {feedback.hands_detected_count > 0 ? ' Hand detected' : ' No hand detected'}
                     </p>
                   </div>
                 )}
@@ -567,7 +567,7 @@ const PracticePage = ({ word, onBack }) => {
                     </div>
                   )}
                   {feedback.is_correct && feedback.points > 0 && (
-                    <div className="points-earned">+{feedback.points} Points! 🌟</div>
+                    <div className="points-earned">+{feedback.points} Points! </div>
                   )}
                   {feedback.top_predictions && feedback.top_predictions.length > 1 && (
                     <div className="top-predictions">
@@ -581,7 +581,7 @@ const PracticePage = ({ word, onBack }) => {
                   )}
                 </div>
                 <button onClick={resetPractice} className="try-again-button">
-                  {feedback.is_correct ? '🎯 Practice More' : '🔄 Try Again'}
+                  {feedback.is_correct ? ' Practice More' : 'Try Again'}
                 </button>
               </div>
             )}
@@ -590,14 +590,14 @@ const PracticePage = ({ word, onBack }) => {
       </div>
 
       <div className="tips-section">
-        <h3>💡 Quick Tips for Better Recognition</h3>
+        <h3> Quick Tips for Better Recognition</h3>
         <div className="tips-grid">
-          <div className="tip-item"><span>📱</span><span>Keep camera steady</span></div>
-          <div className="tip-item"><span>💡</span><span>Ensure bright, even lighting</span></div>
-          <div className="tip-item"><span>🎯</span><span>Center your hands in the frame</span></div>
-          <div className="tip-item"><span>⏱️</span><span>Move slowly and deliberately</span></div>
-          <div className="tip-item"><span>👁️</span><span>Watch the reference video first</span></div>
-          <div className="tip-item"><span>🔍</span><span>Use a plain background</span></div>
+          <div className="tip-item"><span></span><span>Keep camera steady</span></div>
+          <div className="tip-item"><span></span><span>Ensure bright, even lighting</span></div>
+          <div className="tip-item"><span></span><span>Center your hands in the frame</span></div>
+          <div className="tip-item"><span></span><span>Move slowly and deliberately</span></div>
+          <div className="tip-item"><span></span><span>Watch the reference video first</span></div>
+          <div className="tip-item"><span></span><span>Use a plain background</span></div>
         </div>
       </div>
     </div>

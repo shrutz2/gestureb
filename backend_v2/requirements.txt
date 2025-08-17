@@ -1,0 +1,49 @@
+# Production Requirements for Sign Language Recognition System
+# Optimized for performance and compatibility
+
+# === CORE MACHINE LEARNING ===
+tensorflow==2.13.0                 # Latest stable TensorFlow
+numpy==1.24.3                     # Numerical computing
+scikit-learn==1.3.0               # ML utilities and metrics
+
+# === COMPUTER VISION ===
+opencv-python==4.8.1.78           # Computer vision operations
+mediapipe==0.10.7                 # Hand landmark detection
+Pillow==10.0.1                    # Image processing
+
+# === WEB FRAMEWORK ===
+Flask==2.3.3                      # Web API framework
+Flask-CORS==4.0.0                 # Cross-origin resource sharing
+gunicorn==21.2.0                  # Production WSGI server
+
+# === DATA PROCESSING ===
+pandas==2.0.3                     # Data manipulation
+matplotlib==3.7.2                 # Plotting and visualization
+seaborn==0.12.2                   # Statistical plotting
+
+# === UTILITIES ===
+python-dotenv==1.0.0              # Environment variable loading
+pathlib2==2.3.7                   # Cross-platform path handling
+tqdm==4.66.1                      # Progress bars
+psutil==5.9.5                     # System monitoring
+requests==2.31.0                  # HTTP client for API testing
+
+# === DEVELOPMENT ===
+pytest==7.4.0                     # Testing framework
+pytest-cov==4.1.0                 # Coverage reporting
+black==23.7.0                     # Code formatting
+flake8==6.0.0                     # Linting
+
+# === OPTIONAL: GPU ACCELERATION ===
+# Uncomment if you have NVIDIA GPU with CUDA support
+# tensorflow-gpu==2.13.0
+
+# === OPTIONAL: PERFORMANCE OPTIMIZATION ===
+# Uncomment for additional performance
+# numba==0.57.1                   # JIT compilation
+# cupy-cuda11x                     # GPU-accelerated NumPy (CUDA 11.x)
+
+# === DEPLOYMENT ===
+# Uncomment for Docker deployment
+# docker==6.1.3
+# docker-compose==1.29.2

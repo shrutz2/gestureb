@@ -1,0 +1,122 @@
+
+# Ignore virtual environment
+newvenv/
+.env
+sign_env/
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+
+# Ignore dataset/annotation outputs
+*.tfrecord
+*.csv
+*.record
+
+# Ignore model files and archives
+*.zip
+*.h5
+*.pb
+*.pbtxt
+
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# IDE and editors
+.idea/
+.vscode/
+
+# Dependencies
+node_modules/
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Production builds
+/build
+dist/
+dist
+
+# Environment files (comprehensive coverage)
+
+*token.json*
+*credentials.json*
+
+# Logs and debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dump.rdb
+
+# System files
+.DS_Store
+*.pem
+
+# Python
+__pycache__/
+*pyc*
+venv/
+.venv/
+
+# Development tools
+chainlit.md
+.chainlit
+.ipynb_checkpoints/
+.ac
+
+# Deployment
+.vercel
+
+# Data and databases
+agenthub/agents/youtube/db
+
+# Archive files and large assets
+**/*.zip
+**/*.tar.gz
+**/*.tar
+**/*.tgz
+*.pack
+*.deb
+*.dylib
+
+# Build caches
+.cache/
+
+# Mobile development
+android-sdk/ frontend/node_modules/.cache/default-development/0.pack
+
+<<<<<<< HEAD
+# Node modules
+node_modules/
+
+# Python virtual environment
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+=======
+>>>>>>> 38cdfc4dfecf1a1a0dbc79e8c8d7de37e24e1f14

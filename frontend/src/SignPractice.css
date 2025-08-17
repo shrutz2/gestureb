@@ -1,0 +1,28 @@
+.sign-practice {
+  text-align: center;
+  padding: 1rem;
+}
+
+.webcam-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+canvas {
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.feedback {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.highlight {
+  color: #4a90e2;
+  font-weight: bold;
+}

@@ -1,0 +1,9 @@
+{
+  "test_accuracy": 0.9916387796401978,
+  "test_top_k_accuracy": 0.020066889002919197,
+  "best_val_accuracy": 0.9916387796401978,
+  "total_epochs": 86,
+  "num_classes": 299,
+  "training_samples": 2392,
+  "test_samples": 598
+}

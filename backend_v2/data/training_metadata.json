@@ -1,8 +1,8 @@
 {
-  "num_classes": 299,
-  "total_sequences": 299,
+  "num_classes": 293,
+  "total_sequences": 293,
   "shape": [
-    299,
+    293,
     30,
     126
   ],
@@ -17,7 +17,6 @@
     "allow": 1,
     "almost": 1,
     "alone": 1,
-    "also": 1,
     "always": 1,
     "and": 1,
     "angry": 1,
@@ -124,7 +123,6 @@
     "house": 1,
     "how": 1,
     "hurt": 1,
-    "idea": 1,
     "if": 1,
     "important": 1,
     "improve": 1,
@@ -214,7 +212,6 @@
     "run": 1,
     "sad": 1,
     "safe": 1,
-    "same": 1,
     "say": 1,
     "school": 1,
     "see": 1,
@@ -248,12 +245,10 @@
     "story": 1,
     "struggle": 1,
     "study": 1,
-    "summer": 1,
     "support": 1,
     "sure": 1,
     "take": 1,
     "talk": 1,
-    "teach": 1,
     "tell": 1,
     "text": 1,
     "than": 1,
@@ -291,7 +286,6 @@
     "who": 1,
     "why": 1,
     "will": 1,
-    "winter": 1,
     "wish": 1,
     "with": 1,
     "woman": 1,
@@ -307,5 +301,13 @@
     "your": 1,
     "yourself": 1
   },
-  "failed_videos": []
+  "failed_videos": [
+    "also.mp4",
+    "idea.mp4",
+    "same.mp4",
+    "summer.mp4",
+    "teach.mp4",
+    "winter.mp4"
+  ],
+  "enhancement_level": "friend_inspired_hand_detection"
 }

@@ -3,6 +3,36 @@
 /* :root{--primary-blue:#18119e;--border-grey:#8e9094;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',sans-serif;background:#fff;color:#202124;line-height:1.6;}
+/* === CORS Fix CSS === */
+.auth-page, .search-page, .practice-page { 
+  min-height: 100vh; 
+  background: #f8f9fa; 
+}
+
+.auth-container {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+.word-chip {
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  background: white;
+  border: 1px solid #8e9094;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.feedback-panel {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  text-align: center;
+}
 
 /* 2. welcome sticker – bottom-right */
 /* .welcome-sticker{

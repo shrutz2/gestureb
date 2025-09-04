@@ -95,6 +95,10 @@ agenthub/agents/youtube/db
 *.deb
 *.dylib
 
+
+backend_v2/data/db/
+backend_v2/data/mongodb_data/
+
 # Build caches
 .cache/
 

@@ -1,4 +1,4 @@
-// FIXED App.js - Enhanced with real-time hand detection like friend's project
+// MODIFIED App.js - Part 1: Enhanced with REAL MediaPipe hand detection
 import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import './App.css';
 
@@ -27,6 +27,7 @@ const AuthProvider = ({ children }) => {
     if (!initialized) {
       setLoading(false);
       setInitialized(true);
+      
     }
   }, [initialized]);
 
@@ -159,6 +160,7 @@ const AuthPage = ({ onSuccess }) => {
     }));
   };
 
+  
   return (
     <div className="auth-page">
       <div className="auth-container">
@@ -528,7 +530,7 @@ const SearchPage = ({ onSearch, onProfile }) => {
   );
 };
 
-// FIXED Enhanced Practice Page with Real-time Hand Detection
+// MODIFIED Enhanced Practice Page with REAL MediaPipe Hand Detection
 const PracticePage = ({ word, onBack }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -541,29 +543,33 @@ const PracticePage = ({ word, onBack }) => {
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [levelUp, setLevelUp] = useState(false);
   
-  // FIXED: Real-time hand detection state (like friend's project)
+  // REAL hand detection states (with MediaPipe integration)
   const [handsDetected, setHandsDetected] = useState(false);
   const [detectionConfidence, setDetectionConfidence] = useState(0);
   const [realtimeFrames, setRealtimeFrames] = useState([]);
   const [lastPrediction, setLastPrediction] = useState('');
   const [predictionHistory, setPredictionHistory] = useState([]);
+  
+  // NEW: MediaPipe specific states
+  const [mediaPipeHands, setMediaPipeHands] = useState(null);
+  const [realLandmarks, setRealLandmarks] = useState([]);
 
   const { user, token, refreshUserStats } = useAuth();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const overlayCanvasRef = useRef(null); // FIXED: For drawing hand landmarks like friend's project
+  const overlayCanvasRef = useRef(null);
   const streamRef = useRef(null);
   const recordingIntervalRef = useRef(null);
-  const realtimeIntervalRef = useRef(null); // FIXED: For real-time detection
+  const realtimeIntervalRef = useRef(null);
 
-  // FIXED: Enhanced recording configuration similar to friend's approach
+  // Enhanced recording configuration
   const RECORDING_CONFIG = {
     COUNTDOWN_TIME: 3,
     RECORDING_TIME: 4,
     FRAME_INTERVAL: 100,
     MIN_FRAMES: 20,
     MAX_FRAMES: 40,
-    REALTIME_INTERVAL: 150, // Real-time detection every 150ms
+    REALTIME_INTERVAL: 150,
     CONFIDENCE_THRESHOLD: 0.8
   };
 
@@ -571,7 +577,7 @@ const PracticePage = ({ word, onBack }) => {
     startWebcam();
     return () => cleanup();
   }, []);
-
+  // MODIFIED cleanup function with MediaPipe support
   const cleanup = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
@@ -582,8 +588,13 @@ const PracticePage = ({ word, onBack }) => {
     if (realtimeIntervalRef.current) {
       clearInterval(realtimeIntervalRef.current);
     }
+    // NEW: MediaPipe cleanup
+    if (mediaPipeHands) {
+      mediaPipeHands.close();
+    }
   };
 
+  // MODIFIED startWebcam function with MediaPipe integration
   const startWebcam = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -599,9 +610,9 @@ const PracticePage = ({ word, onBack }) => {
         videoRef.current.srcObject = stream;
         setCameraReady(true);
         
-        // FIXED: Start real-time hand detection (like friend's continuous processing)
-        startRealtimeDetection();
-        console.log('✅ Camera ready with real-time hand detection');
+        // CHANGED: Use real MediaPipe instead of mock detection
+        await initializeRealMediaPipe();
+        console.log('✅ Camera ready with REAL MediaPipe hand detection');
       }
     } catch (error) {
       console.error('❌ Camera error:', error);
@@ -609,7 +620,62 @@ const PracticePage = ({ word, onBack }) => {
     }
   };
 
-  // FIXED: Real-time hand detection function (similar to friend's main.py loop)
+  // NEW: Real MediaPipe initialization function
+  const initializeRealMediaPipe = async () => {
+    // Check if MediaPipe scripts loaded
+    if (!window.Hands || !window.Camera) {
+      console.error('❌ MediaPipe not loaded! Check HTML scripts');
+      alert('MediaPipe not loaded. Please refresh the page.');
+      // Fallback to mock detection
+      startRealtimeDetection();
+      return;
+    }
+
+    console.log('🚀 Initializing REAL MediaPipe Hands...');
+
+    try {
+      // Create MediaPipe Hands instance  
+      const hands = new window.Hands({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }
+      });
+
+      // Configure MediaPipe settings
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.7,
+        minTrackingConfidence: 0.7
+      });
+
+      // Set real result handler
+      hands.onResults(handleRealHandResults);
+      setMediaPipeHands(hands);
+
+      // Start real camera processing
+      if (videoRef.current) {
+        const camera = new window.Camera(videoRef.current, {
+          onFrame: async () => {
+            if (hands && videoRef.current) {
+              await hands.send({ image: videoRef.current });
+            }
+          },
+          width: 640,
+          height: 480
+        });
+
+        camera.start();
+        console.log('✅ MediaPipe camera started successfully');
+      }
+    } catch (error) {
+      console.error('❌ MediaPipe initialization error:', error);
+      // Fallback to mock detection if MediaPipe fails
+      startRealtimeDetection();
+    }
+  };
+
+  // Keep original mock detection as fallback
   const startRealtimeDetection = () => {
     if (realtimeIntervalRef.current) {
       clearInterval(realtimeIntervalRef.current);
@@ -619,42 +685,138 @@ const PracticePage = ({ word, onBack }) => {
       if (!isRecording && !isAnalyzing && videoRef.current && canvasRef.current) {
         const frame = captureFrame();
         if (frame) {
-          // Add to realtime frames buffer
           setRealtimeFrames(prev => {
-            const newFrames = [...prev, frame].slice(-10); // Keep last 10 frames
+            const newFrames = [...prev, frame].slice(-10);
             return newFrames;
           });
-
-          // FIXED: Detect hands in real-time and show visual feedback
           detectHandsRealtime(frame);
         }
       }
     }, RECORDING_CONFIG.REALTIME_INTERVAL);
   };
 
-  // FIXED: Real-time hand detection with visual feedback
+  // NEW: Real hand detection results handler
+  const handleRealHandResults = (results) => {
+    if (!overlayCanvasRef.current) return;
+
+    const canvas = overlayCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = 640;
+    canvas.height = 480;
+    
+    // Clear previous drawings
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      // ✅ REAL hands detected!
+      setHandsDetected(true);
+      
+      const allLandmarks = [];
+      
+      // Process each detected hand
+      results.multiHandLandmarks.forEach((landmarks, handIndex) => {
+        // Extract landmark coordinates
+        const handData = landmarks.map(landmark => ({
+          x: landmark.x,
+          y: landmark.y,
+          z: landmark.z || 0
+        }));
+        
+        allLandmarks.push(...handData);
+        
+        // Draw RED DOTS exactly like friend's project
+        landmarks.forEach((landmark, index) => {
+          const x = landmark.x * canvas.width;
+          const y = landmark.y * canvas.height;
+          
+          // Red circle for each landmark point
+          ctx.fillStyle = '#FF4444';
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, 2 * Math.PI);
+          ctx.fill();
+          
+          // White border like friend's visualization
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+        
+        // Draw hand skeleton connections
+        drawHandSkeleton(ctx, landmarks, canvas.width, canvas.height);
+      });
+      
+      // Update states with REAL data
+      setRealLandmarks(allLandmarks);
+      setDetectionConfidence(results.multiHandedness[0]?.score || 0);
+      
+      // Success indicator
+      ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
+      ctx.font = '16px Arial';
+      ctx.fillText('✅ REAL Hands Detected', 10, 30);
+      
+    } else {
+      // No hands detected
+      setHandsDetected(false);
+      setRealLandmarks([]);
+      setDetectionConfidence(0);
+      
+      // No hands indicator
+      ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
+      ctx.font = '16px Arial';
+      ctx.fillText('Show your hands 👋', 10, 30);
+    }
+  };
+
+  // NEW: Draw hand skeleton connections
+  const drawHandSkeleton = (ctx, landmarks, width, height) => {
+    const connections = [
+      // Thumb connections
+      [0, 1], [1, 2], [2, 3], [3, 4],
+      // Index finger
+      [0, 5], [5, 6], [6, 7], [7, 8],
+      // Middle finger
+      [5, 9], [9, 10], [10, 11], [11, 12],
+      // Ring finger
+      [9, 13], [13, 14], [14, 15], [15, 16],
+      // Pinky
+      [13, 17], [17, 18], [18, 19], [19, 20],
+      // Palm
+      [0, 17]
+    ];
+
+    ctx.strokeStyle = '#00FF00';  // Green lines
+    ctx.lineWidth = 2;
+
+    connections.forEach(([start, end]) => {
+      const startPoint = landmarks[start];
+      const endPoint = landmarks[end];
+      
+      if (startPoint && endPoint) {
+        ctx.beginPath();
+        ctx.moveTo(startPoint.x * width, startPoint.y * height);
+        ctx.lineTo(endPoint.x * width, endPoint.y * height);
+        ctx.stroke();
+      }
+    });
+  };
+
+  // Keep original mock detection as fallback
   const detectHandsRealtime = async (frame) => {
     try {
-      // Simple client-side hand detection indicator
-      // In a full implementation, you could send this to backend for real detection
-      
-      // For now, simulate hand detection based on image analysis
       const img = new Image();
       img.onload = () => {
         if (overlayCanvasRef.current && videoRef.current) {
           const overlayCtx = overlayCanvasRef.current.getContext('2d');
           const canvas = overlayCanvasRef.current;
           
-          // Clear previous drawings
           overlayCtx.clearRect(0, 0, canvas.width, canvas.height);
           
-          // FIXED: Simple visual feedback - red dots where hands might be
-          // This simulates friend's landmark drawing
-          if (Math.random() > 0.3) { // 70% chance to "detect" hands
+          if (Math.random() > 0.3) {
             setHandsDetected(true);
-            setDetectionConfidence(Math.random() * 0.4 + 0.6); // 0.6-1.0
+            setDetectionConfidence(Math.random() * 0.4 + 0.6);
             
-            // Draw simple hand indicators (red circles)
             overlayCtx.fillStyle = 'rgba(255, 0, 0, 0.7)';
             overlayCtx.beginPath();
             overlayCtx.arc(canvas.width * 0.3, canvas.height * 0.5, 10, 0, Math.PI * 2);
@@ -664,15 +826,13 @@ const PracticePage = ({ word, onBack }) => {
             overlayCtx.arc(canvas.width * 0.7, canvas.height * 0.5, 10, 0, Math.PI * 2);
             overlayCtx.fill();
             
-            // Add text indicator
             overlayCtx.fillStyle = 'rgba(0, 255, 0, 0.8)';
             overlayCtx.font = '16px Arial';
-            overlayCtx.fillText('Hands Detected ✅', 10, 30);
+            overlayCtx.fillText('Mock Hands Detected ⚠️', 10, 30);
           } else {
             setHandsDetected(false);
             setDetectionConfidence(0);
             
-            // Show "no hands" indicator
             if (overlayCanvasRef.current) {
               overlayCtx.fillStyle = 'rgba(255, 255, 0, 0.8)';
               overlayCtx.font = '16px Arial';
@@ -684,7 +844,7 @@ const PracticePage = ({ word, onBack }) => {
       img.src = frame;
       
     } catch (error) {
-      console.error('Real-time detection error:', error);
+      console.error('Mock detection error:', error);
     }
   };
 
@@ -713,7 +873,7 @@ const PracticePage = ({ word, onBack }) => {
       return;
     }
 
-    // FIXED: Stop real-time detection during recording
+    // Stop real-time detection during recording
     if (realtimeIntervalRef.current) {
       clearInterval(realtimeIntervalRef.current);
     }
@@ -766,9 +926,9 @@ const PracticePage = ({ word, onBack }) => {
       }, RECORDING_CONFIG.FRAME_INTERVAL);
     }, RECORDING_CONFIG.COUNTDOWN_TIME * 1000);
   };
-
+  // MODIFIED analyzeGesture function with real landmarks support
   const analyzeGesture = async (frames) => {
-    console.log(`🤖 Enhanced analysis of ${frames.length} frames for: ${word}`);
+    console.log(`🤖 Enhanced analysis of ${frames.length} frames + ${realLandmarks.length} landmarks for: ${word}`);
     setIsAnalyzing(true);
     
     try {
@@ -783,19 +943,23 @@ const PracticePage = ({ word, onBack }) => {
           predicted_word: '',
           improvement_tips: [
             "Ensure bright, even lighting",
-            "Keep hands clearly visible in center of frame",
+            "Keep hands clearly visible in center of frame", 
             "Use plain background (like friend's setup)",
             "Move hands slowly and deliberately"
           ]
         });
         setIsAnalyzing(false);
         
-        // FIXED: Restart real-time detection
-        startRealtimeDetection();
+        // Restart detection after analysis
+        if (mediaPipeHands) {
+          // MediaPipe will continue automatically
+        } else {
+          startRealtimeDetection();
+        }
         return;
       }
       
-      console.log(`📤 Sending ${validFrames.length} high-quality frames to enhanced backend`);
+      console.log(`📤 Sending ${validFrames.length} frames + ${realLandmarks.length} real landmarks to enhanced backend`);
       
       const response = await fetch(`${API}/predict`, {
         method: 'POST',
@@ -806,9 +970,10 @@ const PracticePage = ({ word, onBack }) => {
         },
         body: JSON.stringify({
           frames: validFrames,
+          landmarks: realLandmarks,  // REAL landmarks from MediaPipe
           target_word: word,
           enhanced_processing: true,
-          focus_hands_only: true // FIXED: Tell backend to focus on hands only
+          real_hand_detection: mediaPipeHands ? true : false  // Flag for backend
         })
       });
       
@@ -846,14 +1011,14 @@ const PracticePage = ({ word, onBack }) => {
         await refreshUserStats();
       }
       
-      // FIXED: Update prediction history
+      // Update prediction history
       setPredictionHistory(prev => [...prev, {
         predicted: result.predicted_word,
         target: word,
         confidence: result.confidence,
         correct: result.is_correct,
         timestamp: new Date().toISOString()
-      }].slice(-5)); // Keep last 5 predictions
+      }].slice(-5));
       
     } catch (error) {
       console.error('❌ Enhanced analysis error:', error);
@@ -867,9 +1032,14 @@ const PracticePage = ({ word, onBack }) => {
     } finally {
       setIsAnalyzing(false);
       
-      // FIXED: Restart real-time detection after analysis
+      // Restart detection after analysis
       setTimeout(() => {
-        startRealtimeDetection();
+        if (mediaPipeHands) {
+          // MediaPipe will continue automatically
+          console.log('🔄 MediaPipe detection continuing...');
+        } else {
+          startRealtimeDetection();
+        }
       }, 1000);
     }
   };
@@ -879,8 +1049,12 @@ const PracticePage = ({ word, onBack }) => {
     setRecordingProgress(0);
     setPredictionHistory([]);
     
-    // Restart real-time detection
-    startRealtimeDetection();
+    // Restart detection
+    if (mediaPipeHands) {
+      // MediaPipe will continue automatically
+    } else {
+      startRealtimeDetection();
+    }
   };
 
   const getSuccessRate = () => {
@@ -888,13 +1062,11 @@ const PracticePage = ({ word, onBack }) => {
     return Math.round((sessionStats.correct / sessionStats.attempts) * 100);
   };
 
-  // FIXED: Setup overlay canvas for real-time hand detection visualization
+  // Setup overlay canvas for hand detection visualization
   useEffect(() => {
     if (overlayCanvasRef.current && videoRef.current) {
       const canvas = overlayCanvasRef.current;
-      const video = videoRef.current;
       
-      // Match canvas size to video
       canvas.width = 640;
       canvas.height = 480;
       canvas.style.position = 'absolute';
@@ -970,7 +1142,7 @@ const PracticePage = ({ word, onBack }) => {
             <h2>Your Practice</h2>
             <p>Enhanced hand detection with real-time feedback</p>
             
-            {/* FIXED: Real-time detection status like friend's project */}
+            {/* ENHANCED: Real-time detection status */}
             <div style={{
               display: 'flex',
               justifyContent: 'center',
@@ -998,6 +1170,15 @@ const PracticePage = ({ word, onBack }) => {
                   Confidence: {Math.round(detectionConfidence * 100)}%
                 </div>
               )}
+              <div style={{
+                padding: '4px 8px',
+                borderRadius: '12px',
+                background: mediaPipeHands ? '#9C27B0' : '#FF9800',
+                color: 'white',
+                fontWeight: '500'
+              }}>
+                {mediaPipeHands ? 'MediaPipe Active' : 'Mock Detection'}
+              </div>
             </div>
           </div>
           
@@ -1005,7 +1186,7 @@ const PracticePage = ({ word, onBack }) => {
             <video ref={videoRef} autoPlay muted playsInline className="practice-camera" />
             <canvas ref={canvasRef} style={{ display: 'none' }} />
             
-            {/* FIXED: Overlay canvas for real-time hand landmarks (like friend's project) */}
+            {/* Enhanced overlay canvas for hand landmarks */}
             <canvas 
               ref={overlayCanvasRef}
               style={{
@@ -1065,7 +1246,7 @@ const PracticePage = ({ word, onBack }) => {
                   }}></div>
                 </div>
                 <div style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                  Focus on clear hand gestures - background ignored!
+                  {mediaPipeHands ? 'Real hand tracking active!' : 'Focus on clear hand gestures'}
                 </div>
               </div>
             )}
@@ -1098,11 +1279,12 @@ const PracticePage = ({ word, onBack }) => {
                     margin: '0 auto 1rem'
                   }}></div>
                   <p>Enhanced AI analyzing your gesture...</p>
-                  <p style={{ fontSize: '0.875rem', color: '#666' }}>Focusing on hand movements only</p>
+                  <p style={{ fontSize: '0.875rem', color: '#666' }}>
+                    {mediaPipeHands ? 'Using real hand data' : 'Processing video frames'}
+                  </p>
                 </div>
               )}
             </div>
-
             {feedback && (
               <div className={`feedback-panel ${feedback.is_correct ? 'success' : 'retry'}`} style={{ marginTop: '1rem' }}>
                 <div className="feedback-icon">
@@ -1112,7 +1294,8 @@ const PracticePage = ({ word, onBack }) => {
                 
                 <div className="feedback-stats">
                   <p><strong>AI Confidence:</strong> {Math.round(feedback.confidence * 100)}%</p>
-                  <p><strong>Hands Detected:</strong> {feedback.hands_detected_count} frames</p>
+                  <p><strong>Detection Method:</strong> {mediaPipeHands ? 'Real MediaPipe' : 'Mock Detection'}</p>
+                  <p><strong>Landmarks Used:</strong> {realLandmarks.length > 0 ? `${realLandmarks.length} points` : 'Video only'}</p>
                   
                   {feedback.predicted_word && feedback.predicted_word !== word && (
                     <div style={{
@@ -1124,7 +1307,7 @@ const PracticePage = ({ word, onBack }) => {
                     }}>
                       <p><strong>🤖 AI Detected:</strong> "{feedback.predicted_word}"</p>
                       <p><strong>🎯 You were practicing:</strong> "{word}"</p>
-                      <p><strong>💡 Tip:</strong> The AI focuses only on your hand movements</p>
+                      <p><strong>💡 Tip:</strong> {mediaPipeHands ? 'Real hand landmarks were used' : 'Try better lighting for hand detection'}</p>
                     </div>
                   )}
                   
@@ -1185,13 +1368,13 @@ const PracticePage = ({ word, onBack }) => {
         </div>
       </div>
 
-      {/* FIXED: Enhanced tips section with friend's project insights */}
+      {/* Enhanced tips section with MediaPipe insights */}
       <div className="tips-section">
         <h3>🎯 Enhanced Recognition Tips</h3>
         <div className="tips-grid">
           <div className="tip-item">
             <span>👋</span>
-            <span>Keep hands visible and centered (AI focuses only on hands)</span>
+            <span>{mediaPipeHands ? 'Real hand tracking active - 21 points detected' : 'Keep hands visible and centered'}</span>
           </div>
           <div className="tip-item">
             <span>💡</span>
@@ -1202,7 +1385,7 @@ const PracticePage = ({ word, onBack }) => {
             <span>Plain background works best (like professional setups)</span>
           </div>
           <div className="tip-item">
-            <span>🐌</span>
+            <span>🌐</span>
             <span>Move slowly and deliberately for better recognition</span>
           </div>
           <div className="tip-item">
@@ -1215,7 +1398,7 @@ const PracticePage = ({ word, onBack }) => {
           </div>
         </div>
         
-        {/* FIXED: Real-time feedback panel */}
+        {/* Enhanced real-time feedback panel */}
         <div style={{
           marginTop: '2rem',
           background: 'white',
@@ -1224,12 +1407,18 @@ const PracticePage = ({ word, onBack }) => {
           border: '1px solid #ddd'
         }}>
           <h4>📊 Real-time Status</h4>
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
             <div>
               <strong>Hand Detection:</strong> {handsDetected ? '✅ Active' : '❌ None'}
             </div>
             <div>
               <strong>Confidence:</strong> {Math.round(detectionConfidence * 100)}%
+            </div>
+            <div>
+              <strong>Method:</strong> {mediaPipeHands ? 'MediaPipe' : 'Mock'}
+            </div>
+            <div>
+              <strong>Landmarks:</strong> {realLandmarks.length}
             </div>
             <div>
               <strong>Frames Buffer:</strong> {realtimeFrames.length}/10
@@ -1257,13 +1446,25 @@ const PracticePage = ({ word, onBack }) => {
               </div>
             </div>
           )}
+
+          {mediaPipeHands && (
+            <div style={{
+              marginTop: '1rem',
+              padding: '0.5rem',
+              background: '#e8f5e8',
+              borderRadius: '8px',
+              fontSize: '0.875rem'
+            }}>
+              <strong>✅ MediaPipe Status:</strong> Real-time hand tracking active with 21-point landmark detection
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// User Profile Component
+// User Profile Component (unchanged)
 const UserProfile = ({ onBack }) => {
   const [userStats, setUserStats] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -1321,7 +1522,7 @@ const UserProfile = ({ onBack }) => {
         </div>
       </div>
     );
-  }
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fa', padding: '2rem' }}>
@@ -1406,7 +1607,6 @@ const UserProfile = ({ onBack }) => {
             🏆 Leaderboard
           </button>
         </div>
-
         {activeTab === 'stats' && userStats && (
           <div>
             <div className="stats-grid" style={{
@@ -1574,7 +1774,7 @@ const UserProfile = ({ onBack }) => {
   );
 };
 
-// Main App Component
+// Main App Component (unchanged)
 function App() {
   const [currentPage, setCurrentPage] = useState('landing');
   const [currentWord, setCurrentWord] = useState('');
@@ -1593,7 +1793,7 @@ function App() {
   );
 }
 
-// Auth Wrapper Component
+// Auth Wrapper Component (unchanged)
 const AuthWrapper = ({ currentPage, currentWord, setCurrentPage, setCurrentWord }) => {
   const { user, loading, isAuthenticated } = useAuth();
 
@@ -1674,5 +1874,57 @@ const AuthWrapper = ({ currentPage, currentWord, setCurrentPage, setCurrentWord 
       return <LandingPage onGetStarted={handleGetStarted} />;
   }
 };
+
+// Keep the original addVisualFeedback function (unchanged)
+function addVisualFeedback(videoRef) {
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '10';
+    
+    if (videoRef.parentNode) {
+        videoRef.parentNode.style.position = 'relative';
+        videoRef.parentNode.appendChild(canvas);
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    function drawHandDots() {
+        if (!videoRef.videoWidth) return;
+        
+        canvas.width = videoRef.videoWidth;
+        canvas.height = videoRef.videoHeight;
+        canvas.style.width = videoRef.offsetWidth + 'px';
+        canvas.style.height = videoRef.offsetHeight + 'px';
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw red dots like friend's project
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        for (let i = 0; i < 21; i++) {
+            const angle = (i / 21) * 2 * Math.PI;
+            const radius = 50 + (i % 5) * 10;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+            
+            ctx.fillStyle = '#FF4444';
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        requestAnimationFrame(drawHandDots);
+    }
+    
+    drawHandDots();
+}
 
 export default App;

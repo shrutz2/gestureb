@@ -165,7 +165,7 @@ const AuthPage = ({ onSuccess }) => {
     <div className="auth-page">
       <div className="auth-container">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🤟</div>
+          <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>ðŸ¤Ÿ</div>
           <h1>{isLogin ? 'Welcome Back' : 'Join GestureB'}</h1>
           <p>{isLogin ? 'Sign in to continue your journey' : 'Start learning sign language today'}</p>
         </div>
@@ -312,7 +312,7 @@ const LandingPage = ({ onGetStarted }) => {
           <div>
             <div style={{ fontWeight: '600' }}>{user.username}</div>
             <div style={{ fontSize: '0.875rem', color: '#666' }}>
-              Level {user.stats?.level || 1} • {user.stats?.total_points || 0} pts
+              Level {user.stats?.level || 1} â€¢ {user.stats?.total_points || 0} pts
             </div>
           </div>
           <button 
@@ -366,7 +366,7 @@ const LandingPage = ({ onGetStarted }) => {
                 </div>
                 <div className="stat-card">
                   <div className="stat-number">{user.stats?.current_streak || 0}</div>
-                  <div className="stat-label">Streak 🔥</div>
+                  <div className="stat-label">Streak ðŸ”¥</div>
                 </div>
               </div>
             )}
@@ -518,7 +518,7 @@ const SearchPage = ({ onSearch, onProfile }) => {
               <div className="word-chips">
                 {user.stats.words_practiced.slice(-6).map(w => (
                   <button key={w} onClick={() => handleSearch(w)} className="word-chip practiced" disabled={isSearching}>
-                    {w} ✅
+                    {w} âœ…
                   </button>
                 ))}
               </div>
@@ -612,10 +612,10 @@ const PracticePage = ({ word, onBack }) => {
         
         // CHANGED: Use real MediaPipe instead of mock detection
         await initializeRealMediaPipe();
-        console.log('✅ Camera ready with REAL MediaPipe hand detection');
+        console.log('âœ… Camera ready with REAL MediaPipe hand detection');
       }
     } catch (error) {
-      console.error('❌ Camera error:', error);
+      console.error('âŒ Camera error:', error);
       alert('Camera access needed for sign practice. Please allow camera permission and refresh.');
     }
   };
@@ -624,14 +624,14 @@ const PracticePage = ({ word, onBack }) => {
   const initializeRealMediaPipe = async () => {
     // Check if MediaPipe scripts loaded
     if (!window.Hands || !window.Camera) {
-      console.error('❌ MediaPipe not loaded! Check HTML scripts');
+      console.error('âŒ MediaPipe not loaded! Check HTML scripts');
       alert('MediaPipe not loaded. Please refresh the page.');
       // Fallback to mock detection
       startRealtimeDetection();
       return;
     }
 
-    console.log('🚀 Initializing REAL MediaPipe Hands...');
+    console.log('ðŸš€ Initializing REAL MediaPipe Hands...');
 
     try {
       // Create MediaPipe Hands instance  
@@ -666,10 +666,10 @@ const PracticePage = ({ word, onBack }) => {
         });
 
         camera.start();
-        console.log('✅ MediaPipe camera started successfully');
+        console.log('âœ… MediaPipe camera started successfully');
       }
     } catch (error) {
-      console.error('❌ MediaPipe initialization error:', error);
+      console.error('âŒ MediaPipe initialization error:', error);
       // Fallback to mock detection if MediaPipe fails
       startRealtimeDetection();
     }
@@ -710,7 +710,7 @@ const PracticePage = ({ word, onBack }) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      // ✅ REAL hands detected!
+      // âœ… REAL hands detected!
       setHandsDetected(true);
       
       const allLandmarks = [];
@@ -754,7 +754,7 @@ const PracticePage = ({ word, onBack }) => {
       // Success indicator
       ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
       ctx.font = '16px Arial';
-      ctx.fillText('✅ REAL Hands Detected', 10, 30);
+      ctx.fillText('âœ… REAL Hands Detected', 10, 30);
       
     } else {
       // No hands detected
@@ -765,7 +765,7 @@ const PracticePage = ({ word, onBack }) => {
       // No hands indicator
       ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
       ctx.font = '16px Arial';
-      ctx.fillText('Show your hands 👋', 10, 30);
+      ctx.fillText('Show your hands ðŸ‘‹', 10, 30);
     }
   };
 
@@ -828,7 +828,7 @@ const PracticePage = ({ word, onBack }) => {
             
             overlayCtx.fillStyle = 'rgba(0, 255, 0, 0.8)';
             overlayCtx.font = '16px Arial';
-            overlayCtx.fillText('Mock Hands Detected ⚠️', 10, 30);
+            overlayCtx.fillText('Mock Hands Detected âš ï¸', 10, 30);
           } else {
             setHandsDetected(false);
             setDetectionConfidence(0);
@@ -836,7 +836,7 @@ const PracticePage = ({ word, onBack }) => {
             if (overlayCanvasRef.current) {
               overlayCtx.fillStyle = 'rgba(255, 255, 0, 0.8)';
               overlayCtx.font = '16px Arial';
-              overlayCtx.fillText('Show your hands 👋', 10, 30);
+              overlayCtx.fillText('Show your hands ðŸ‘‹', 10, 30);
             }
           }
         }
@@ -884,7 +884,7 @@ const PracticePage = ({ word, onBack }) => {
     setCountdown(RECORDING_CONFIG.COUNTDOWN_TIME);
     setSessionStats(prev => ({ ...prev, attempts: prev.attempts + 1 }));
 
-    console.log(`🎬 Starting enhanced recording for: ${word}`);
+    console.log(`ðŸŽ¬ Starting enhanced recording for: ${word}`);
 
     // Countdown phase
     const countInterval = setInterval(() => {
@@ -903,7 +903,7 @@ const PracticePage = ({ word, onBack }) => {
       let frameCount = 0;
       const totalFrames = Math.floor(RECORDING_CONFIG.RECORDING_TIME * 1000 / RECORDING_CONFIG.FRAME_INTERVAL);
 
-      console.log(`📹 Recording ${totalFrames} frames over ${RECORDING_CONFIG.RECORDING_TIME} seconds`);
+      console.log(`ðŸ“¹ Recording ${totalFrames} frames over ${RECORDING_CONFIG.RECORDING_TIME} seconds`);
 
       recordingIntervalRef.current = setInterval(() => {
         const frame = captureFrame();
@@ -919,7 +919,7 @@ const PracticePage = ({ word, onBack }) => {
             setIsRecording(false);
             setRecordingProgress(100);
             
-            console.log(`✅ Completed recording with ${frames.length} total frames`);
+            console.log(`âœ… Completed recording with ${frames.length} total frames`);
             analyzeGesture(frames);
           }
         }
@@ -928,7 +928,7 @@ const PracticePage = ({ word, onBack }) => {
   };
   // MODIFIED analyzeGesture function with real landmarks support
   const analyzeGesture = async (frames) => {
-    console.log(`🤖 Enhanced analysis of ${frames.length} frames + ${realLandmarks.length} landmarks for: ${word}`);
+    console.log(`ðŸ¤– Enhanced analysis of ${frames.length} frames + ${realLandmarks.length} landmarks for: ${word}`);
     setIsAnalyzing(true);
     
     try {
@@ -937,7 +937,7 @@ const PracticePage = ({ word, onBack }) => {
       if (validFrames.length < RECORDING_CONFIG.MIN_FRAMES) {
         setFeedback({
           is_correct: false,
-          message: `⚠️ Need more clear frames (got ${validFrames.length}, need ${RECORDING_CONFIG.MIN_FRAMES}). Try with better lighting and clearer hand movements!`,
+          message: `âš ï¸ Need more clear frames (got ${validFrames.length}, need ${RECORDING_CONFIG.MIN_FRAMES}). Try with better lighting and clearer hand movements!`,
           confidence: 0,
           points: 0,
           predicted_word: '',
@@ -959,7 +959,7 @@ const PracticePage = ({ word, onBack }) => {
         return;
       }
       
-      console.log(`📤 Sending ${validFrames.length} frames + ${realLandmarks.length} real landmarks to enhanced backend`);
+      console.log(`ðŸ“¤ Sending ${validFrames.length} frames + ${realLandmarks.length} real landmarks to enhanced backend`);
       
       const response = await fetch(`${API}/predict`, {
         method: 'POST',
@@ -979,7 +979,7 @@ const PracticePage = ({ word, onBack }) => {
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🚨 Enhanced API Error:', response.status, errorText);
+        console.error('ðŸš¨ Enhanced API Error:', response.status, errorText);
         
         setFeedback({
           is_correct: false,
@@ -992,7 +992,7 @@ const PracticePage = ({ word, onBack }) => {
       }
       
       const result = await response.json();
-      console.log(`📊 Enhanced prediction result:`, result);
+      console.log(`ðŸ“Š Enhanced prediction result:`, result);
       
       setFeedback(result);
       
@@ -1021,7 +1021,7 @@ const PracticePage = ({ word, onBack }) => {
       }].slice(-5));
       
     } catch (error) {
-      console.error('❌ Enhanced analysis error:', error);
+      console.error('âŒ Enhanced analysis error:', error);
       setFeedback({
         is_correct: false,
         message: 'Network error. Please check if enhanced backend is running on http://localhost:5000',
@@ -1036,7 +1036,7 @@ const PracticePage = ({ word, onBack }) => {
       setTimeout(() => {
         if (mediaPipeHands) {
           // MediaPipe will continue automatically
-          console.log('🔄 MediaPipe detection continuing...');
+          console.log('ðŸ”„ MediaPipe detection continuing...');
         } else {
           startRealtimeDetection();
         }
@@ -1094,13 +1094,13 @@ const PracticePage = ({ word, onBack }) => {
           zIndex: 1000,
           boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
         }}>
-          🎉 Level Up! You're now Level {user?.stats?.level || 1}! 🎉
+          ðŸŽ‰ Level Up! You're now Level {user?.stats?.level || 1}! ðŸŽ‰
         </div>
       )}
 
       <div className="practice-header">
         <button onClick={onBack} className="back-button">
-          ← Back
+          â† Back
         </button>
         <div className="practice-title">
           <h1>Enhanced Practice: "{word}"</h1>
@@ -1109,7 +1109,7 @@ const PracticePage = ({ word, onBack }) => {
             <span>Level: {user?.stats?.level || 1}</span>
             <span>Total: {user?.stats?.total_points || 0} pts</span>
             <span>Success: {getSuccessRate()}%</span>
-            <span>Streak: {user?.stats?.current_streak || 0} 🔥</span>
+            <span>Streak: {user?.stats?.current_streak || 0} ðŸ”¥</span>
           </div>
         </div>
       </div>
@@ -1131,7 +1131,7 @@ const PracticePage = ({ word, onBack }) => {
           </video>
           {videoError && (
             <div style={{padding: '20px', textAlign: 'center', color: '#666'}}>
-              <p>📹 Video not available for "{word}"</p>
+              <p>ðŸ“¹ Video not available for "{word}"</p>
               <p>Practice based on your knowledge of the sign!</p>
             </div>
           )}
@@ -1157,7 +1157,7 @@ const PracticePage = ({ word, onBack }) => {
                 color: 'white',
                 fontWeight: '500'
               }}>
-                {handsDetected ? '✅ Hands Detected' : '❌ No Hands'}
+                {handsDetected ? 'âœ… Hands Detected' : 'âŒ No Hands'}
               </div>
               {handsDetected && (
                 <div style={{
@@ -1288,7 +1288,7 @@ const PracticePage = ({ word, onBack }) => {
             {feedback && (
               <div className={`feedback-panel ${feedback.is_correct ? 'success' : 'retry'}`} style={{ marginTop: '1rem' }}>
                 <div className="feedback-icon">
-                  {feedback.is_correct ? '🎉' : '🤔'}
+                  {feedback.is_correct ? 'ðŸŽ‰' : 'ðŸ¤”'}
                 </div>
                 <div className="feedback-message">{feedback.message}</div>
                 
@@ -1305,15 +1305,15 @@ const PracticePage = ({ word, onBack }) => {
                       padding: '1rem',
                       margin: '1rem 0'
                     }}>
-                      <p><strong>🤖 AI Detected:</strong> "{feedback.predicted_word}"</p>
-                      <p><strong>🎯 You were practicing:</strong> "{word}"</p>
-                      <p><strong>💡 Tip:</strong> {mediaPipeHands ? 'Real hand landmarks were used' : 'Try better lighting for hand detection'}</p>
+                      <p><strong>ðŸ¤– AI Detected:</strong> "{feedback.predicted_word}"</p>
+                      <p><strong>ðŸŽ¯ You were practicing:</strong> "{word}"</p>
+                      <p><strong>ðŸ’¡ Tip:</strong> {mediaPipeHands ? 'Real hand landmarks were used' : 'Try better lighting for hand detection'}</p>
                     </div>
                   )}
                   
                   {feedback.is_correct && feedback.points > 0 && (
                     <div className="points-earned">
-                      +{feedback.points} Points! 🎯
+                      +{feedback.points} Points! ðŸŽ¯
                       {feedback.user_stats && (
                         <div style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
                           Total: {feedback.user_stats.total_points} pts | Level: {feedback.user_stats.level} | Accuracy: {Math.round(feedback.user_stats.accuracy)}%
@@ -1324,7 +1324,7 @@ const PracticePage = ({ word, onBack }) => {
                   
                   {feedback.top_predictions && feedback.top_predictions.length > 1 && (
                     <div style={{ marginTop: '1rem' }}>
-                      <p><strong>🏆 Top AI Predictions:</strong></p>
+                      <p><strong>ðŸ† Top AI Predictions:</strong></p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                         {feedback.top_predictions.slice(0, 3).map((pred, i) => (
                           <div key={i} style={{
@@ -1352,15 +1352,15 @@ const PracticePage = ({ word, onBack }) => {
                       padding: '0.5rem',
                       borderRadius: '4px'
                     }}>
-                      <p>🔧 Debug: Model loaded: {feedback.debug_info.model_loaded ? 'Yes' : 'No'}</p>
-                      <p>📊 Valid frames ratio: {Math.round((feedback.debug_info.valid_frames_ratio || 0) * 100)}%</p>
-                      <p>🎯 Processing: {feedback.debug_info.processing_method || 'standard'}</p>
+                      <p>ðŸ”§ Debug: Model loaded: {feedback.debug_info.model_loaded ? 'Yes' : 'No'}</p>
+                      <p>ðŸ“Š Valid frames ratio: {Math.round((feedback.debug_info.valid_frames_ratio || 0) * 100)}%</p>
+                      <p>ðŸŽ¯ Processing: {feedback.debug_info.processing_method || 'standard'}</p>
                     </div>
                   )}
                 </div>
                 
                 <button onClick={resetPractice} className="retry-button" style={{ marginTop: '1rem' }}>
-                  {feedback.is_correct ? '🎯 Practice More' : '🔄 Try Again'}
+                  {feedback.is_correct ? 'ðŸŽ¯ Practice More' : 'ðŸ”„ Try Again'}
                 </button>
               </div>
             )}
@@ -1370,30 +1370,30 @@ const PracticePage = ({ word, onBack }) => {
 
       {/* Enhanced tips section with MediaPipe insights */}
       <div className="tips-section">
-        <h3>🎯 Enhanced Recognition Tips</h3>
+        <h3>ðŸŽ¯ Enhanced Recognition Tips</h3>
         <div className="tips-grid">
           <div className="tip-item">
-            <span>👋</span>
+            <span>ðŸ‘‹</span>
             <span>{mediaPipeHands ? 'Real hand tracking active - 21 points detected' : 'Keep hands visible and centered'}</span>
           </div>
           <div className="tip-item">
-            <span>💡</span>
+            <span>ðŸ’¡</span>
             <span>Use bright, even lighting - avoid shadows</span>
           </div>
           <div className="tip-item">
-            <span>🎥</span>
+            <span>ðŸŽ¥</span>
             <span>Plain background works best (like professional setups)</span>
           </div>
           <div className="tip-item">
-            <span>🌐</span>
+            <span>ðŸŒ</span>
             <span>Move slowly and deliberately for better recognition</span>
           </div>
           <div className="tip-item">
-            <span>📺</span>
+            <span>ðŸ“º</span>
             <span>Watch reference video multiple times</span>
           </div>
           <div className="tip-item">
-            <span>🔄</span>
+            <span>ðŸ”„</span>
             <span>Practice until you get consistent results</span>
           </div>
         </div>
@@ -1406,10 +1406,10 @@ const PracticePage = ({ word, onBack }) => {
           borderRadius: '12px',
           border: '1px solid #ddd'
         }}>
-          <h4>📊 Real-time Status</h4>
+          <h4>ðŸ“Š Real-time Status</h4>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
             <div>
-              <strong>Hand Detection:</strong> {handsDetected ? '✅ Active' : '❌ None'}
+              <strong>Hand Detection:</strong> {handsDetected ? 'âœ… Active' : 'âŒ None'}
             </div>
             <div>
               <strong>Confidence:</strong> {Math.round(detectionConfidence * 100)}%
@@ -1427,7 +1427,7 @@ const PracticePage = ({ word, onBack }) => {
           
           {predictionHistory.length > 0 && (
             <div style={{ marginTop: '1rem' }}>
-              <strong>📈 Recent Predictions:</strong>
+              <strong>ðŸ“ˆ Recent Predictions:</strong>
               <div style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
                 {predictionHistory.slice(-3).map((pred, i) => (
                   <div key={i} style={{
@@ -1437,8 +1437,8 @@ const PracticePage = ({ word, onBack }) => {
                     borderBottom: i < predictionHistory.length - 1 ? '1px solid #eee' : 'none'
                   }}>
                     <span>
-                      Target: {pred.target} → AI: {pred.predicted} 
-                      {pred.correct ? ' ✅' : ' ❌'}
+                      Target: {pred.target} â†’ AI: {pred.predicted} 
+                      {pred.correct ? ' âœ…' : ' âŒ'}
                     </span>
                     <span>{Math.round(pred.confidence * 100)}%</span>
                   </div>
@@ -1455,7 +1455,7 @@ const PracticePage = ({ word, onBack }) => {
               borderRadius: '8px',
               fontSize: '0.875rem'
             }}>
-              <strong>✅ MediaPipe Status:</strong> Real-time hand tracking active with 21-point landmark detection
+              <strong>âœ… MediaPipe Status:</strong> Real-time hand tracking active with 21-point landmark detection
             </div>
           )}
         </div>
@@ -1538,7 +1538,7 @@ const UserProfile = ({ onBack }) => {
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
         marginBottom: '2rem'
       }}>
-        <button onClick={onBack} className="back-button">← Back</button>
+        <button onClick={onBack} className="back-button">â† Back</button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{
             width: '60px',
@@ -1556,7 +1556,7 @@ const UserProfile = ({ onBack }) => {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '1.5rem' }}>{user.username}</h1>
-            <p style={{ margin: 0, color: '#666' }}>Level {userStats?.level || 1} • {userStats?.total_points || 0} points</p>
+            <p style={{ margin: 0, color: '#666' }}>Level {userStats?.level || 1} â€¢ {userStats?.total_points || 0} points</p>
           </div>
         </div>
         <button onClick={logout} style={{
@@ -1590,7 +1590,7 @@ const UserProfile = ({ onBack }) => {
               fontWeight: '600'
             }}
           >
-            📊 Statistics
+            ðŸ“Š Statistics
           </button>
           <button 
             onClick={() => setActiveTab('leaderboard')}
@@ -1604,7 +1604,7 @@ const UserProfile = ({ onBack }) => {
               fontWeight: '600'
             }}
           >
-            🏆 Leaderboard
+            ðŸ† Leaderboard
           </button>
         </div>
         {activeTab === 'stats' && userStats && (
@@ -1643,7 +1643,7 @@ const UserProfile = ({ onBack }) => {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
               }}>
                 <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#ff9800' }}>{userStats.current_streak}</div>
-                <div style={{ color: '#666', fontWeight: '500' }}>Current Streak 🔥</div>
+                <div style={{ color: '#666', fontWeight: '500' }}>Current Streak ðŸ”¥</div>
               </div>
               <div className="stat-card" style={{
                 background: 'white',
@@ -1686,7 +1686,7 @@ const UserProfile = ({ onBack }) => {
                 borderRadius: '16px',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
               }}>
-                <h3 style={{ marginBottom: '1rem' }}>📚 Words You've Practiced</h3>
+                <h3 style={{ marginBottom: '1rem' }}>ðŸ“š Words You've Practiced</h3>
                 <div style={{
                   display: 'flex',
                   flexWrap: 'wrap',
@@ -1717,7 +1717,7 @@ const UserProfile = ({ onBack }) => {
             borderRadius: '16px',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}>
-            <h3 style={{ textAlign: 'center', marginBottom: '2rem' }}>🏆 Top Performers</h3>
+            <h3 style={{ textAlign: 'center', marginBottom: '2rem' }}>ðŸ† Top Performers</h3>
             <div>
               {leaderboard.map((player, i) => (
                 <div key={player.user_id} style={{

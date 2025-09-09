@@ -1,5 +1,5 @@
 import os
-
+from datetime import timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -8,16 +8,23 @@ VIDEO_DIR = os.path.join(basedir, "videos")
 if not os.path.exists(VIDEO_DIR):
     os.makedirs(VIDEO_DIR, exist_ok=True)
 
-
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "gizli_anahtar"
-    # ek ayarlar (DB URI vb.)
+    
+    # SQLite Database (आपके existing ML models के लिए)
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(
         basedir, "sign-language-recognition.sqlite"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    
+    # MongoDB Configuration (Authentication के लिए)
+    MONGO_URI = os.environ.get("MONGO_URI") or "mongodb://localhost:27017/gesture_auth"
+    
+    # JWT Configuration
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or "jwt-secret-string"
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+    
+    # Celery Configuration
     CELERY_BROKER_URL = "redis://localhost:6379/0"
-    # CELERY_BROKER_URL = "rediss://:p94f5b8254a375717cceef3e88703d824469d08b8a5a8d2aa7e6b1f49efae6d79@ec2-52-72-19-75.compute-1.amazonaws.com:6769"
     CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
-    # CELERY_RESULT_BACKEND = "rediss://:p94f5b8254a375717cceef3e88703d824469d08b8a5a8d2aa7e6b1f49efae6d79@ec2-52-72-19-75.compute-1.amazonaws.com:6769"

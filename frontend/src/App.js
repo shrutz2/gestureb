@@ -549,8 +549,11 @@ const PracticePage = ({ word, onBack }) => {
   const [realtimeFrames, setRealtimeFrames] = useState([]);
   const [lastPrediction, setLastPrediction] = useState('');
   const [predictionHistory, setPredictionHistory] = useState([]);
-  
-  // NEW: MediaPipe specific states
+  // Frame buffering for auto-prediction
+  const [frameBuffer, setFrameBuffer] = useState([]);
+  const [gestureBuffer, setGestureBuffer] = useState([]);
+  const BUFFER_SIZE = 30;
+  // MediaPipe specific states
   const [mediaPipeHands, setMediaPipeHands] = useState(null);
   const [realLandmarks, setRealLandmarks] = useState([]);
 
@@ -701,71 +704,107 @@ const PracticePage = ({ word, onBack }) => {
 
     const canvas = overlayCanvasRef.current;
     const ctx = canvas.getContext('2d');
-    
-    // Set canvas size
     canvas.width = 640;
     canvas.height = 480;
-    
-    // Clear previous drawings
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      // âœ… REAL hands detected!
       setHandsDetected(true);
-      
       const allLandmarks = [];
-      
-      // Process each detected hand
       results.multiHandLandmarks.forEach((landmarks, handIndex) => {
-        // Extract landmark coordinates
         const handData = landmarks.map(landmark => ({
           x: landmark.x,
           y: landmark.y,
           z: landmark.z || 0
         }));
-        
         allLandmarks.push(...handData);
-        
-        // Draw RED DOTS exactly like friend's project
         landmarks.forEach((landmark, index) => {
           const x = landmark.x * canvas.width;
           const y = landmark.y * canvas.height;
-          
-          // Red circle for each landmark point
           ctx.fillStyle = '#FF4444';
           ctx.beginPath();
           ctx.arc(x, y, 6, 0, 2 * Math.PI);
           ctx.fill();
-          
-          // White border like friend's visualization
           ctx.strokeStyle = 'white';
           ctx.lineWidth = 2;
           ctx.stroke();
         });
-        
-        // Draw hand skeleton connections
         drawHandSkeleton(ctx, landmarks, canvas.width, canvas.height);
       });
-      
-      // Update states with REAL data
       setRealLandmarks(allLandmarks);
       setDetectionConfidence(results.multiHandedness[0]?.score || 0);
-      
-      // Success indicator
+
+      // Buffering logic
+      const currentFrame = {
+        landmarks: allLandmarks,
+        timestamp: Date.now(),
+        confidence: results.multiHandedness[0]?.score || 0
+      };
+      setGestureBuffer(prev => {
+        const newBuffer = [...prev, currentFrame].slice(-BUFFER_SIZE);
+        if (newBuffer.length >= BUFFER_SIZE) {
+          makePredictionFromBuffer(newBuffer);
+        }
+        return newBuffer;
+      });
+      setFrameBuffer(prev => {
+        const newFrames = [...prev, currentFrame].slice(-BUFFER_SIZE);
+        return newFrames;
+      });
       ctx.fillStyle = 'rgba(0, 255, 0, 0.8)';
       ctx.font = '16px Arial';
-      ctx.fillText('âœ… REAL Hands Detected', 10, 30);
-      
+      ctx.fillText(`✅ Hands Detected - Buffer: ${gestureBuffer.length}/${BUFFER_SIZE}`, 10, 30);
     } else {
-      // No hands detected
       setHandsDetected(false);
       setRealLandmarks([]);
       setDetectionConfidence(0);
-      
-      // No hands indicator
       ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
       ctx.font = '16px Arial';
-      ctx.fillText('Show your hands ðŸ‘‹', 10, 30);
+      ctx.fillText('Show your hands 👋', 10, 30);
+    }
+  };
+
+  // Auto-prediction function
+  const makePredictionFromBuffer = async (buffer) => {
+    if (!buffer || buffer.length < BUFFER_SIZE) {
+      return;
+    }
+    try {
+      const frames = buffer.map(frame => frame.landmarks);
+      const response = await fetch(`${API}/predict`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          frames: frames,
+          landmarks: buffer[buffer.length - 1].landmarks,
+          target_word: word || 'unknown',
+          enhanced_processing: true,
+          real_hand_detection: true
+        })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setLastPrediction(result.predicted_word);
+        setPredictionHistory(prev => [...prev, {
+          word: result.predicted_word,
+          confidence: result.confidence,
+          timestamp: new Date().toLocaleTimeString()
+        }].slice(-5));
+      }
+    } catch (error) {
+      // Silent fail
+    }
+  };
+
+  // Manual prediction button
+  const handleManualPredict = () => {
+    if (gestureBuffer.length >= 10) {
+      makePredictionFromBuffer(gestureBuffer);
+    } else {
+      alert(`Need more frames. Current: ${gestureBuffer.length}/30`);
     }
   };
 
@@ -1077,7 +1116,7 @@ const PracticePage = ({ word, onBack }) => {
   }, [cameraReady]);
 
   return (
-    <div className="practice-page">
+  <div className="practice-page">
       {levelUp && (
         <div style={{
           position: 'fixed',
@@ -1253,20 +1292,37 @@ const PracticePage = ({ word, onBack }) => {
 
             <div className="camera-controls">
               {!isRecording && !isAnalyzing && (
-                <button 
-                  onClick={startRecording} 
-                  className="record-button"
-                  disabled={!cameraReady}
-                  style={{
-                    background: handsDetected ? '#4CAF50' : '#f44336',
-                    opacity: handsDetected ? 1 : 0.7
-                  }}
-                >
-                  {feedback ? 'Practice Again' : `Start Enhanced ${RECORDING_CONFIG.RECORDING_TIME}s Practice`}
-                  {!handsDetected && <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>Show your hands first</div>}
-                </button>
+                <>
+                  <button 
+                    onClick={startRecording} 
+                    className="record-button"
+                    disabled={!cameraReady}
+                    style={{
+                      background: handsDetected ? '#4CAF50' : '#f44336',
+                      opacity: handsDetected ? 1 : 0.7
+                    }}
+                  >
+                    {feedback ? 'Practice Again' : `Start Enhanced ${RECORDING_CONFIG.RECORDING_TIME}s Practice`}
+                    {!handsDetected && <div style={{ fontSize: '0.75rem', marginTop: '4px' }}>Show your hands first</div>}
+                  </button>
+                  <div style={{ margin: '1rem 0' }}>
+                    <button 
+                      onClick={handleManualPredict}
+                      disabled={gestureBuffer.length < 10}
+                      style={{
+                        padding: '10px 20px',
+                        backgroundColor: gestureBuffer.length >= 10 ? '#4CAF50' : '#ccc',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: gestureBuffer.length >= 10 ? 'pointer' : 'not-allowed'
+                      }}
+                    >
+                      Predict Gesture ({gestureBuffer.length}/30 frames)
+                    </button>
+                  </div>
+                </>
               )}
-              
               {isAnalyzing && (
                 <div style={{textAlign: 'center', padding: '20px'}}>
                   <div style={{
@@ -1288,80 +1344,29 @@ const PracticePage = ({ word, onBack }) => {
             {feedback && (
               <div className={`feedback-panel ${feedback.is_correct ? 'success' : 'retry'}`} style={{ marginTop: '1rem' }}>
                 <div className="feedback-icon">
-                  {feedback.is_correct ? 'ðŸŽ‰' : 'ðŸ¤”'}
+                  {feedback.is_correct ? '🎉' : '🤔'}
                 </div>
                 <div className="feedback-message">{feedback.message}</div>
-                
                 <div className="feedback-stats">
                   <p><strong>AI Confidence:</strong> {Math.round(feedback.confidence * 100)}%</p>
                   <p><strong>Detection Method:</strong> {mediaPipeHands ? 'Real MediaPipe' : 'Mock Detection'}</p>
                   <p><strong>Landmarks Used:</strong> {realLandmarks.length > 0 ? `${realLandmarks.length} points` : 'Video only'}</p>
-                  
-                  {feedback.predicted_word && feedback.predicted_word !== word && (
-                    <div style={{
-                      background: '#fff3cd',
-                      border: '1px solid #ffeaa7',
-                      borderRadius: '8px',
-                      padding: '1rem',
-                      margin: '1rem 0'
-                    }}>
-                      <p><strong>ðŸ¤– AI Detected:</strong> "{feedback.predicted_word}"</p>
-                      <p><strong>ðŸŽ¯ You were practicing:</strong> "{word}"</p>
-                      <p><strong>ðŸ’¡ Tip:</strong> {mediaPipeHands ? 'Real hand landmarks were used' : 'Try better lighting for hand detection'}</p>
-                    </div>
-                  )}
-                  
-                  {feedback.is_correct && feedback.points > 0 && (
-                    <div className="points-earned">
-                      +{feedback.points} Points! ðŸŽ¯
-                      {feedback.user_stats && (
-                        <div style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                          Total: {feedback.user_stats.total_points} pts | Level: {feedback.user_stats.level} | Accuracy: {Math.round(feedback.user_stats.accuracy)}%
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {feedback.top_predictions && feedback.top_predictions.length > 1 && (
-                    <div style={{ marginTop: '1rem' }}>
-                      <p><strong>ðŸ† Top AI Predictions:</strong></p>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                        {feedback.top_predictions.slice(0, 3).map((pred, i) => (
-                          <div key={i} style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            padding: '0.25rem 0.5rem',
-                            background: i === 0 ? '#e3f2fd' : '#f5f5f5',
-                            borderRadius: '4px',
-                            fontSize: '0.875rem'
-                          }}>
-                            <span>{pred.word}</span>
-                            <span>{pred.percentage}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {feedback.debug_info && (
-                    <div style={{
-                      marginTop: '1rem',
-                      fontSize: '0.75rem',
-                      color: '#666',
-                      background: '#f8f9fa',
-                      padding: '0.5rem',
-                      borderRadius: '4px'
-                    }}>
-                      <p>ðŸ”§ Debug: Model loaded: {feedback.debug_info.model_loaded ? 'Yes' : 'No'}</p>
-                      <p>ðŸ“Š Valid frames ratio: {Math.round((feedback.debug_info.valid_frames_ratio || 0) * 100)}%</p>
-                      <p>ðŸŽ¯ Processing: {feedback.debug_info.processing_method || 'standard'}</p>
-                    </div>
-                  )}
+                  {/* ...existing code... */}
                 </div>
-                
                 <button onClick={resetPractice} className="retry-button" style={{ marginTop: '1rem' }}>
-                  {feedback.is_correct ? 'ðŸŽ¯ Practice More' : 'ðŸ”„ Try Again'}
+                  {feedback.is_correct ? '🎯 Practice More' : '🧹 Try Again'}
                 </button>
+              </div>
+            )}
+            {/* Show recent predictions */}
+            {predictionHistory.length > 0 && (
+              <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f0f0' }}>
+                <h4>Recent Predictions:</h4>
+                {predictionHistory.map((pred, i) => (
+                  <div key={i}>
+                    {pred.timestamp}: <strong>{pred.word}</strong> ({Math.round(pred.confidence * 100)}%)
+                  </div>
+                ))}
               </div>
             )}
           </div>

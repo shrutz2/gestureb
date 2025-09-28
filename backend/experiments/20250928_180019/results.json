@@ -1,0 +1,24 @@
+{
+    "timestamp": "20250928_180019",
+    "config": {
+        "run_timestamp": "20250928_180019",
+        "sequence_length": 30,
+        "feature_dim": 126,
+        "num_epochs": 100,
+        "batch_size": 32,
+        "learning_rate": 0.001,
+        "seed": 42,
+        "num_classes": 177
+    },
+    "performance": {
+        "loss": 2.581249713897705,
+        "accuracy": 0.4098360538482666,
+        "top3_accuracy": 0.688524603843689
+    },
+    "model_info": {
+        "sequence_length": 30,
+        "feature_dim": 126,
+        "num_classes": 177,
+        "total_parameters": 426353
+    }
+}

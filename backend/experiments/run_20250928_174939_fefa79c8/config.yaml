@@ -1,0 +1,26 @@
+artifacts_dir: artifacts
+batch_size: 32
+data_dir: data/processed
+dense_units:
+- 256
+dropout_rate: 0.3
+early_stopping_patience: 15
+epochs: 80
+experiments_dir: experiments
+feature_dim: 126
+l2_reg: 0.001
+learning_rate: 0.0001
+log_dir: logs
+lstm_units:
+- 128
+- 128
+min_lr: 1e-7
+model_type: BiLSTM
+models_dir: models
+num_classes: null
+optimizer: Adam
+reduce_lr_factor: 0.5
+reduce_lr_patience: 7
+run_id: default
+seed: 42
+sequence_length: 30

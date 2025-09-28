@@ -1,8 +1,0 @@
-{
-  "test_accuracy": 0.019704433158040047,
-  "top3_accuracy": 0.034482758620689655,
-  "total_parameters": 269876,
-  "approach": "landmark_based",
-  "all_classes": 180,
-  "target_achieved": false
-}
